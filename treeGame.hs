@@ -16,7 +16,7 @@ type AdjList = [Node]
 type Node = (Int,Char)
 
 display :: State -> IO ()
-display state = undefined
+display state = print state
 
 -- boolVals is a list of bools representing true/false = finished/unfinished for each tree
 -- boolVals is constructed by extracting each tree from state and folding over the tree 
@@ -76,10 +76,26 @@ isValid move state id =
 		srcAdjList = (state !! t) !! s
 		edge = [tuple | tuple <- srcAdjList, fst(tuple)==d]
 
+pruneEdge :: Int->AdjList->AdjList
+pruneEdge _ []						= []
+pruneEdge s y:ys	| s==fst(y)		= pruneEdge s ys
+					| otherwise		= y:pruneEdge s ys
+
+retDestList :: Tree
+retDestList s y:ys  | s==fst(y!!1)	= (map (\x -> fst(x)) ys) : retDestList 
+					| otherwise		= retDestList s ys
+					where
+						children = (map (\x -> fst(x)) ys)
 
 
 modify :: State->Move->State
-modify state move = undefined
+modify state move = 
+	dfs tree s d
+	where
+		t = move !! 0
+		s = move !! 1
+		d = move !! 2
+		tree = state !! s
 
 
 
