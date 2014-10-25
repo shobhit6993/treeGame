@@ -1,5 +1,42 @@
-[ [[(0,'N')]] ]
+[
+	[ 
+		[]
+	],
 
-[ [[(0,'N')]] , [[(0,'N')],[(1,'N'),(2,'R'),(3,'G'),(4,'B')],[(2,'N'),(5,'b')],[(3,'N')],[(4,'N'),(6,'G')],[(5,'N')],[(6,'N'),(7,'G'),(8,'R')]] ]
+	[ 	
+		[] , 
+		
+		[
+			Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
+			Node {nodeId=2, adjList=[(5,'B')]},
+			Node {nodeId=3, adjList=[]},
+			Node {nodeId=4, adjList=[(6,'G')]},
+			Node {nodeId=5, adjList=[]},
+			Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
+			Node {nodeId=7, adjList=[]},
+			Node {nodeId=8, adjList=[]}
+		] 
+	],
 
-[ [[(0,'N')]] , [[(0,'N')],[(1,'N'),(2,'R'),(3,'G'),(4,'B')],[(2,'N'),(5,'B')],[(3,'N')],[(4,'N'),(6,'G')],[(5,'N')],[(6,'N'),(7,'G'),(8,'R')]] , [[(0,'N')],[(1,'N'),(2,'R')],[(2,'N'),(3,'G')],[(3,'N')]] ]
+	[
+		[],
+
+		[
+			Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
+			Node {nodeId=2, adjList=[(5,'B')]},
+			Node {nodeId=3, adjList=[]},
+			Node {nodeId=4, adjList=[(6,'G')]},
+			Node {nodeId=5, adjList=[]},
+			Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
+			Node {nodeId=7, adjList=[]},
+			Node {nodeId=8, adjList=[]}
+		],
+
+		[
+			Node {nodeId=1, adjList=[(2,'R')]},
+			Node {nodeId=2, adjList=[(3,'G')]},
+			Node {nodeId=3, adjList=[]}
+		]
+
+	]
+]

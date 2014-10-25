@@ -9,21 +9,25 @@ colour = ['R','G']
 -- Player X can remove Red or Blue; Player Y can remove Green or Blue
 -- Levels, Trees, and Nodes are indexed starting from ONE (1)
 
+data Node = Node 
+			{
+				nodeId :: Int
+				,adjList :: [(Int,Char)]
+			}	deriving (Show)
+
 type Move = [Int] -- (tree no., source node id, dest node id). Size must be THREE (3)
 type State = [Tree]
-type Tree = [AdjList]
-type AdjList = [Node]
-type Node = (Int,Char)
+type Tree = [Node]
 
 display :: State -> IO ()
 display state = print state
 
--- boolVals is a list of bools representing true/false = finished/unfinished for each tree
--- boolVals is constructed by extracting each tree from state and folding over the tree 
--- to check if each adj list is of size EXACTLY 1
+-- game is finished when each tree has only the root node left, with no edges
+-- so each Tree of State should have EXACTLY one Node
 isFinished :: State -> Bool
-isFinished state = foldl (\acc x -> acc && x) True boolVals
-	where boolVals = [ foldl (\acc x -> if ((length x) == 1) then (acc && True) else False) True (state !! i) | i <- [0..length state - 1] ]
+isFinished state = null nonEmptyTrees
+	where
+		nonEmptyTrees = filter (\tree -> (length tree) > 1) state
 
 getLevelNo :: IO Int
 getLevelNo = do
@@ -51,13 +55,53 @@ loadAllLevels filename = undefined
 loadState :: Int->State
 loadState levelNo = levels !! levelNo
 	where levels =	[
-						[ [[(0,'N')]] ],
+						[ 
+							[
+								Node {nodeId = 1, adjList = []}
+							]
+						],
 
-						[ [[(0,'N')]] , [[(0,'N')],[(1,'N'),(2,'R'),(3,'G'),(4,'B')],[(2,'N'),(5,'b')],[(3,'N')],[(4,'N'),(6,'G')],[(5,'N')],[(6,'N'),(7,'G'),(8,'R')]] ],
+						[ 	
+							[
+								Node {nodeId = 1, adjList = []}
+							] , 
+							
+							[
+								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
+								Node {nodeId=2, adjList=[(5,'B')]},
+								Node {nodeId=3, adjList=[]},
+								Node {nodeId=4, adjList=[(6,'G')]},
+								Node {nodeId=5, adjList=[]},
+								Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
+								Node {nodeId=7, adjList=[]},
+								Node {nodeId=8, adjList=[]}
+							] 
+						],
 
-						[ [[(0,'N')]] , [[(0,'N')],[(1,'N'),(2,'R'),(3,'G'),(4,'B')],[(2,'N'),(5,'B')],[(3,'N')],[(4,'N'),(6,'G')],[(5,'N')],[(6,'N'),(7,'G'),(8,'R')]] , [[(0,'N')],[(1,'N'),(2,'R')],[(2,'N'),(3,'G')],[(3,'N')]] ]
+						[
+							[
+								Node {nodeId = 1, adjList = []}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
+								Node {nodeId=2, adjList=[(5,'B')]},
+								Node {nodeId=3, adjList=[]},
+								Node {nodeId=4, adjList=[(6,'G')]},
+								Node {nodeId=5, adjList=[]},
+								Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
+								Node {nodeId=7, adjList=[]},
+								Node {nodeId=8, adjList=[]}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'R')]},
+								Node {nodeId=2, adjList=[(3,'G')]},
+								Node {nodeId=3, adjList=[]}
+							]
+
+						]
 					]
-
 
 isValid :: Move->State->Int->Bool
 isValid move state id =
@@ -73,30 +117,48 @@ isValid move state id =
 		t = move !! 0
 		s = move !! 1
 		d = move !! 2
-		srcAdjList = (state !! t) !! s
-		edge = [tuple | tuple <- srcAdjList, fst(tuple)==d]
+		tree = (state !! t)
+		srcAdjList = adjList ((filter (\x -> (nodeId x)==s) tree) !! 0)
+		edge = filter (\x -> (fst x)==d) srcAdjList
 
-pruneEdge :: Int->AdjList->AdjList
-pruneEdge _ []						= []
-pruneEdge s y:ys	| s==fst(y)		= pruneEdge s ys
-					| otherwise		= y:pruneEdge s ys
 
-retDestList :: Tree
-retDestList s y:ys  | s==fst(y!!1)	= (map (\x -> fst(x)) ys) : retDestList 
-					| otherwise		= retDestList s ys
-					where
-						children = (map (\x -> fst(x)) ys)
+pruneSubTree :: Int->Tree->Tree
+pruneSubTree s tree = 
+	cleanList (map (\c -> if((nodeId c) == s) then Node{nodeId = -1,adjList = [(-1,'N')]} else c) tree')
+	where
+		children = getChildren tree s
+		tree' = foldl (\acc c -> if c == -1 then acc else (pruneSubTree c acc)) tree children
 
+getChildren :: Tree->Int->[Int]
+getChildren tree s = 
+	map(\t -> fst(t)) adjListOfs
+	where
+	adjListOfs 	= adjList (tempList !! 0)
+	tempList = filter (\x -> (nodeId x) == s) tree
+
+cleanList :: Tree->Tree
+cleanList tree = 
+	foldl (\acc x -> if ((nodeId x) == -1) then acc else [x]++acc) [] tree
 
 modify :: State->Move->State
 modify state move = 
-	dfs tree s d
+	take t state ++ [(dfs tree move)] ++ drop (t + 1) state
 	where
 		t = move !! 0
+		tree = (state !! t)
+
+dfs :: Tree->Move->Tree
+dfs tree move = 
+	pruneSubTree d newTree
+	where
 		s = move !! 1
 		d = move !! 2
-		tree = state !! s
-
+		srcAdjList = adjList ((filter (\x -> (nodeId x)==s) tree) !! 0)
+		newAdjList = foldl (\acc x -> if fst(x)==d then acc else [x]++acc) [] srcAdjList
+		newTree = 
+			foldl (\acc x ->	if (nodeId x)==s 
+									then [Node {nodeId=s, adjList=newAdjList}] ++ acc
+								else [x]++acc) [] tree
 
 
 main = do
@@ -155,7 +217,16 @@ gameLoop state id = do
 
 
 {- sampleTree 
-		= [[[(0,'N')],[(1,'N'),(2,'R'),(3,'G'),(4,'B')],[(2,'N'),(5,'b')],[(3,'N')],[(4,'N'),(6,'G')],[(5,'N')],[(6,'N'),(7,'G'),(8,'R')]]]
+		= [
+			Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
+			Node {nodeId=2, adjList=[(5,'B')]},
+			Node {nodeId=3, adjList=[]},
+			Node {nodeId=4, adjList=[(6,'G')]},
+			Node {nodeId=5, adjList=[]},
+			Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
+			Node {nodeId=7, adjList=[]},
+			Node {nodeId=8, adjList=[]}
+		] 
 
 			1
 		  / | \
