@@ -61,24 +61,7 @@ loadState levelNo = levels !! levelNo
 							]
 						],
 
-						[ 	
-							[
-								Node {nodeId = 1, adjList = []}
-							] , 
-							
-							[
-								Node {nodeId=1, adjList=[(2,'G'),(3,'G'),(4,'G')]},
-								Node {nodeId=2, adjList=[(5,'G')]},
-								Node {nodeId=3, adjList=[]},
-								Node {nodeId=4, adjList=[(6,'G')]},
-								Node {nodeId=5, adjList=[]},
-								Node {nodeId=6, adjList=[(7,'G'),(8,'G')]},
-								Node {nodeId=7, adjList=[]},
-								Node {nodeId=8, adjList=[]}
-							] 
-						],
-
-						[ 	
+						[
 							[
 								Node {nodeId = 1, adjList = []}
 							] , 
