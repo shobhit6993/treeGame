@@ -67,6 +67,23 @@ loadState levelNo = levels !! levelNo
 							] , 
 							
 							[
+								Node {nodeId=1, adjList=[(2,'G'),(3,'G'),(4,'G')]},
+								Node {nodeId=2, adjList=[(5,'G')]},
+								Node {nodeId=3, adjList=[]},
+								Node {nodeId=4, adjList=[(6,'G')]},
+								Node {nodeId=5, adjList=[]},
+								Node {nodeId=6, adjList=[(7,'G'),(8,'G')]},
+								Node {nodeId=7, adjList=[]},
+								Node {nodeId=8, adjList=[]}
+							] 
+						],
+
+						[ 	
+							[
+								Node {nodeId = 1, adjList = []}
+							] , 
+							
+							[
 								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
 								Node {nodeId=2, adjList=[(5,'B')]},
 								Node {nodeId=3, adjList=[]},
@@ -160,7 +177,6 @@ dfs tree move =
 									then [Node {nodeId=s, adjList=newAdjList}] ++ acc
 								else [x]++acc) [] tree
 
-
 main = do
 	--levels <- loadAllLevels "levels.txt"
 	levelNo <- getLevelNo
@@ -185,7 +201,70 @@ gameLoop state id = do
 				gameLoop state id 	--if invalid move, then gameLoop with same state and same player
 
 
+-- functions for the AI part
 
+--returns the combined edgeList of ALL trees as a list of 4 tuple (tId, sourceId, DestId, EdgeColour)
+--intially pass idx=0
+getAllEdges :: State->Int->[(Int,Int,Int,Char)]
+getAllEdges (tree:[]) idx = getEdgesOneTree tree idx
+getAllEdges (tree:xs) idx = (getEdgesOneTree tree idx)++(getAllEdges xs (idx+1))
+
+--returns the edgeList of tree#tId as a list of 4 tuple (tId, sourceId, DestId, EdgeColour)
+getEdgesOneTree :: Tree->Int->[(Int,Int,Int,Char)]
+getEdgesOneTree tree tId = 
+	foldl (\acc n -> if((length (adjList n)) == 0) then acc else (edgeList tId (nodeId n) (adjList n)) ++acc) [] tree
+
+--returns the edgeList of for a particular source of tree#tId as a list of 4 tuple (tId, sourceId, DestId, EdgeColour)
+edgeList :: Int->Int->[(Int, Char)]->[(Int,Int,Int,Char)]
+edgeList tId s childList = zipWith (\x y -> (tId, s, fst(y), snd(y))) [s..] childList
+
+--given the combined edges of ALL trees, it returns an edge removing which is a winning strategy for player#id,
+--if no such edge exists, an invalid edge
+-- edge is represented as the 4-tuple (Bool, tId, sourceId, destId) where bool = false means invalid edge.
+temp :: [(Int,Int,Int,Char)]
+temp = [(1,1,2,'R'),(1,2,3,'G'),(1,3,4,'R'),(2,1,2,'R'),(3,1,2,'G')]
+
+winOnOne :: [(Int,Int,Int,Char)]->[(Int,Int,Int,Char)]->Int->(Bool, Int, Int, Int)
+winOnOne allEdges [] pId = (False, -1, -1, -1)
+winOnOne allEdges (e:edges) pId = 
+	if ((frth'(e)==(colour !! pId) || frth'(e)=='B') && (looseOnAll allEdges' allEdges' (mod' (pId+1) 2)) == True)
+		then
+			(True, fst'(e), snd'(e), thrd'(e))
+		else
+			winOnOne allEdges edges pId
+	where
+		fst' (f,_,_,_) = f
+		snd' (_,s,_,_) = s
+		thrd' (_,_,t,_) = t
+		frth' (_,_,_,f) = f
+		allEdges' = 
+			foldl (\acc x ->if fst'(x)==fst'(e) && snd'(x)==snd'(e) && thrd'(x)==thrd'(e) && frth'(x)==frth'(e)
+								then acc
+							else [x]++acc) [] allEdges
+
+--given the combined edges of ALL trees, it returns True if there does not exist any winning strategy for player#pId in the form of removal of an edge 
+--if atleast one such edge exists, it returns False
+looseOnAll :: [(Int,Int,Int,Char)]->[(Int,Int,Int,Char)]->Int->Bool
+looseOnAll allEdges [] pId = True
+looseOnAll allEdges (e:edges) pId = 
+	if ((frth'(e)==(colour !! pId) || frth'(e)=='B'))
+		then
+			if(fst'(winOnOne allEdges' allEdges' (mod' (pId+1) 2)) == False)
+				then
+					False
+				else
+					looseOnAll allEdges edges pId
+		else
+			looseOnAll allEdges edges pId
+	where
+		fst' (f,_,_,_) = f
+		snd' (_,s,_,_) = s
+		thrd' (_,t,_,_) = t
+		frth' (_,_,_,f) = f
+		allEdges' = 
+			foldl (\acc x ->if fst'(x)==fst'(e) && snd'(x)==snd'(e) && thrd'(x)==thrd'(e) && frth'(x)==frth'(e)
+								then acc
+							else [x]++acc) [] allEdges
 
 {- Basic Code Flow
 
