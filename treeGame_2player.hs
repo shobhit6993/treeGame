@@ -121,23 +121,48 @@ main = do
 gameLoop:: State->Int->IO ()
 gameLoop state id = do
 	display state
-	if isFinished state
-		then putStrLn ("Player "++(player !! id)++" lost :(")
+	if ((isFinished state) || (prediction == []))
+		then putStrLn ("\n!!!!!!!!!!!!!!!!!!!!!!!!Player "++(player !! id)++" lost!!!!!!!!!!!!!!!!!!!!!!!!\n")
 	else do
+		putStrLn ("\n------------------------Player "++(player !! id)++" turn --------------------------\n")
 		move <- getInput
 		if isValid move state id 	--check if given move is valid for curr player on curr state
 			then gameLoop (modify state move) (mod' (id+1) 2)
 						-- gameLoop with modified state and next player
 		else
 			do
-				putStrLn ("Invalid Move! Try again...")
+				putStrLn ("\nInvalid Move! Try again...")
 				gameLoop state id 	--if invalid move, then gameLoop with same state and same player
 
+	where 
+		prediction = computerMove state id
 
--- functions for the AI part
+--------------------------------------------------------------
+
+-- functions for the AI part used here just to predict if game ended or not
+-- FOR UNDERSTANDIG THIS, ITS BETTER TO READ THE computer VERSION OF THE GAME in treeGame_computer.hs
+
+computerMove :: State->Int->Move
+computerMove state id =
+	if fst'(move) == False then
+		if null randomEdge
+			then []
+		else [fst'(randomEdge !! 0), snd'(randomEdge !! 0),thrd'(randomEdge !! 0)]
+	else
+		[snd'(move),thrd'(move),frth'(move)]
+
+	where
+		edges = getAllEdges state 0
+		move = winOnOne edges edges id
+		fst' (f,_,_,_) = f
+		snd' (_,s,_,_) = s
+		thrd' (_,_,t,_) = t
+		frth' (_,_,_,f) = f
+		randomEdge = (filter (\e -> (frth'(e)==(colour !! id)) || (frth'(e)=='B')) edges)
+
 
 --returns the combined edgeList of ALL trees as a list of 4 tuple (tId, sourceId, DestId, EdgeColour)
---intially pass idx=0
+--intially pass idx as 0
 getAllEdges :: State->Int->[(Int,Int,Int,Char)]
 getAllEdges (tree:[]) idx = getEdgesOneTree tree idx
 getAllEdges (tree:xs) idx = (getEdgesOneTree tree idx)++(getAllEdges xs (idx+1))
@@ -154,8 +179,9 @@ edgeList tId s childList = zipWith (\x y -> (tId, s, fst(y), snd(y))) [s..] chil
 --given the combined edges of ALL trees, it returns an edge removing which is a winning strategy for player#id,
 --if no such edge exists, an invalid edge
 -- edge is represented as the 4-tuple (Bool, tId, sourceId, destId) where bool = false means invalid edge.
-temp :: [(Int,Int,Int,Char)]
-temp = [(1,1,2,'R'),(1,2,3,'G'),(1,3,4,'R'),(2,1,2,'R'),(3,1,2,'G')]
+temp :: State
+temp = [[Node {nodeId = 1, adjList = []}],[Node {nodeId = 1, adjList = [(3,'G')]},Node {nodeId = 3, adjList = []}]]
+--temp  [(1,1,2,'R'),(1,2,3,'G'),(1,3,4,'R'),(2,1,2,'R'),(3,1,2,'G')]
 
 winOnOne :: [(Int,Int,Int,Char)]->[(Int,Int,Int,Char)]->Int->(Bool, Int, Int, Int)
 winOnOne allEdges [] pId = (False, -1, -1, -1)
@@ -210,6 +236,7 @@ loadState levelNo = levels !! levelNo
 							]
 						],
 
+						--1
 						[
 							[
 								Node {nodeId = 1, adjList = []}
@@ -227,6 +254,7 @@ loadState levelNo = levels !! levelNo
 							] 
 						],
 
+						--2
 						[
 							[
 								Node {nodeId = 1, adjList = []}
@@ -247,6 +275,31 @@ loadState levelNo = levels !! levelNo
 								Node {nodeId=1, adjList=[(2,'R')]},
 								Node {nodeId=2, adjList=[(3,'G')]},
 								Node {nodeId=3, adjList=[]}
+							]
+
+						],
+
+						--3
+						[
+							[
+								Node {nodeId = 1, adjList = []}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'R')]},
+								Node {nodeId=2, adjList=[(3,'G')]},
+								Node {nodeId=3, adjList=[(4,'R')]},
+								Node {nodeId=4, adjList=[]}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'R')]},
+								Node {nodeId=2, adjList=[]}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'G')]},
+								Node {nodeId=2, adjList=[]}
 							]
 
 						]

@@ -129,9 +129,9 @@ gameLoop state id = do
 		putStrLn ("\n------------------------Player "++(player !! id)++" turn --------------------------\n")
 		if(id==1)		--computer's move
 			then
-				if (compMove == [])
-					then putStrLn ("\n!!!!!!!!!!!!!!!!!!!!!!!!Player "++(player !! id)++" lost!!!!!!!!!!!!!!!!!!!!!!!!\n")
-				else
+				--if (compMove == [])
+				--	then putStrLn ("\n!!!!!!!!!!!!!!!!!!!!!!!!Player "++(player !! id)++" lost!!!!!!!!!!!!!!!!!!!!!!!!\n")
+				--else
 					gameLoop (modify state compMove) (mod' (id+1) 2)
 				
 
@@ -244,6 +244,7 @@ loadState levelNo = levels !! levelNo
 							]
 						],
 
+						--1
 						[
 							[
 								Node {nodeId = 1, adjList = []}
@@ -261,6 +262,7 @@ loadState levelNo = levels !! levelNo
 							] 
 						],
 
+						--2
 						[
 							[
 								Node {nodeId = 1, adjList = []}
@@ -281,6 +283,31 @@ loadState levelNo = levels !! levelNo
 								Node {nodeId=1, adjList=[(2,'R')]},
 								Node {nodeId=2, adjList=[(3,'G')]},
 								Node {nodeId=3, adjList=[]}
+							]
+
+						],
+
+						--3
+						[
+							[
+								Node {nodeId = 1, adjList = []}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'R')]},
+								Node {nodeId=2, adjList=[(3,'G')]},
+								Node {nodeId=3, adjList=[(4,'R')]},
+								Node {nodeId=4, adjList=[]}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'R')]},
+								Node {nodeId=2, adjList=[]}
+							],
+
+							[
+								Node {nodeId=1, adjList=[(2,'G')]},
+								Node {nodeId=2, adjList=[]}
 							]
 
 						]
