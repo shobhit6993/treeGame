@@ -21,11 +21,13 @@ Example command to play 1 player version (User vs Computer) for level=5
 * Player 2 can remove either one `Green` edge or one `Blue` edge
 * When an edge `E` is removed, the its entire subtree (including itself) is pruned.
 * The player which plays the last move wins
+
 ---
 ### System Requirements
 * haskell-platform
 * OpenGL for drawing purposes, and GTK2 for UI.
 * For Ubuntu or any other Debian distributed OS like Elementary, follow these steps to install OpenGL + GTK2
+
 ----
     sudo apt-get install haskell-platform
     cabal update
