@@ -310,7 +310,23 @@ loadState levelNo = levels !! levelNo
 								Node {nodeId=2, adjList=[]}
 							]
 
+						],
+
+						[
+							[
+								Node {nodeId = 1, adjList = []}
+							],
+							
+							[
+								Node {nodeId = 1, adjList = [(2,'R'),(5,'B')]},
+								Node {nodeId = 2, adjList = [(3,'R')]},
+								Node {nodeId = 3, adjList = [(4,'B')]},
+								Node {nodeId = 4, adjList = []},
+								Node {nodeId = 5, adjList = [(6,'B')]},
+								Node {nodeId = 6, adjList = []}
+							]
 						]
+
 					]
 
 -----------------------------------------------

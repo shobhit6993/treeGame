@@ -2,7 +2,7 @@ module TreeGameTwoPlayer where
 import Data.Fixed
 import Data.List.Split
 import Control.Monad (forM_, liftM)
-
+import Levels
 player = ["X","Y"]
 colour = ['R','G']
 
@@ -38,22 +38,8 @@ playMove (treeNum, srcNum, destNum) gs = GameState {turn = not (turn gs), treeLi
 	where
 		newState = (modify (treeList gs) [treeNum, srcNum, destNum])
 
-playAIMove = undefined
-data GameState = GameState
-				{
-					turn :: Bool
-					,treeList :: [Tree]
-				}
+--playAIMove = undefined/
 
-data Node = Node 
-			{
-				nodeId :: Int
-				,adjList :: [(Int,Char)]
-			}	deriving (Show)
-
-type Move = [Int] -- (tree no., source node id, dest node id). Size must be THREE (3)
-type State = [Tree]
-type Tree = [Node]
 
 
 --display :: State -> IO ()
@@ -173,15 +159,15 @@ gameLoop state id = do
 				gameLoop state id 	--if invalid move, then gameLoop with same state and same player
 
 	where 
-		prediction = computerMove state id
+		prediction = computerMove id state
 
 --------------------------------------------------------------
 
 -- functions for the AI part used here just to predict if game ended or not
 -- FOR UNDERSTANDIG THIS, ITS BETTER TO READ THE computer VERSION OF THE GAME in treeGame_computer.hs
 
-computerMove :: State->Int->Move
-computerMove state id =
+computerMove :: Int->State->Move
+computerMove id state =
 	if fst'(move) == False then
 		if null randomEdge
 			then []
@@ -262,86 +248,6 @@ looseOnAll allEdges (e:edges) pId =
 			foldl (\acc x ->if fst'(x)==fst'(e) && snd'(x)==snd'(e) && thrd'(x)==thrd'(e) && frth'(x)==frth'(e)
 								then acc
 							else [x]++acc) [] allEdges
-
--------------------------------------------------------
-
-loadState :: Int->State
-loadState levelNo = levels !! levelNo
-	where levels =	[
-						[ 
-							[
-								Node {nodeId = 1, adjList = []}
-							]
-						],
-
-						--1
-						[
-							[
-								Node {nodeId = 1, adjList = []}
-							] , 
-							
-							[
-								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
-								Node {nodeId=2, adjList=[(5,'B')]},
-								Node {nodeId=3, adjList=[]},
-								Node {nodeId=4, adjList=[(6,'G')]},
-								Node {nodeId=5, adjList=[]},
-								Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
-								Node {nodeId=7, adjList=[]},
-								Node {nodeId=8, adjList=[]}
-							] 
-						],
-
-						--2
-						[
-							[
-								Node {nodeId = 1, adjList = []}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
-								Node {nodeId=2, adjList=[(5,'B')]},
-								Node {nodeId=3, adjList=[]},
-								Node {nodeId=4, adjList=[(6,'G')]},
-								Node {nodeId=5, adjList=[]},
-								Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
-								Node {nodeId=7, adjList=[]},
-								Node {nodeId=8, adjList=[]}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R')]},
-								Node {nodeId=2, adjList=[(3,'G')]},
-								Node {nodeId=3, adjList=[]}
-							]
-
-						],
-
-						--3
-						[
-							[
-								Node {nodeId = 1, adjList = []}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R')]},
-								Node {nodeId=2, adjList=[(3,'G')]},
-								Node {nodeId=3, adjList=[(4,'R')]},
-								Node {nodeId=4, adjList=[]}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R')]},
-								Node {nodeId=2, adjList=[]}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'G')]},
-								Node {nodeId=2, adjList=[]}
-							]
-
-						]
-					]
 
 -----------------------------------------------
 {- Basic Code Flow

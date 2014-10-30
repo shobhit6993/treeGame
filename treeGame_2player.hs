@@ -1,13 +1,38 @@
-module TreeGame where
+module TreeGameTwoPlayer where
 import Data.Fixed
 import Data.List.Split
 import Control.Monad (forM_, liftM)
 
 player = ["X","Y"]
 colour = ['R','G']
-
+-- SC convert coulour to convert 'r' to 1 .....
 -- Player X can remove Red or Blue; Player Y can remove Green or Blue
 -- Levels, Trees, and Nodes are indexed starting from ONE (1)
+
+initgs :: Int->Int->GameState
+initgs levelId pId = 
+	GameState {turn = (if(pId==0) then True else False), treeList=state}
+	where state = loadState levelId
+
+
+convertCol :: Char->Int
+convertCol shobhitCol = if shobhitCol == 'R' then 1
+							else if shobhitCol == 'G' then 3
+								else 2
+
+formatConversion :: [(Int, Char)]->[(Int, Int)]
+formatConversion adjlist = map (\dest -> ((fst dest), (convertCol (snd dest)))) adjList
+
+getDestList :: Tree->[(Int, Int)]
+getDestList [] src = []
+getDestList (node:nodelist) src = if (nodeId node) == src then (formatConversion (adjList node)) else getDestList nodelist src
+
+
+data GameState = GameState
+				{
+					turn :: Bool
+					,treeList :: [Tree]
+				}
 
 data Node = Node 
 			{
@@ -18,6 +43,7 @@ data Node = Node
 type Move = [Int] -- (tree no., source node id, dest node id). Size must be THREE (3)
 type State = [Tree]
 type Tree = [Node]
+
 
 display :: State -> IO ()
 display state = print state

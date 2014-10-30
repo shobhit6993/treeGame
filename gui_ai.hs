@@ -7,6 +7,7 @@ import Data.IORef
 import Data.Char
 import Control.Monad
 import TreeGameTwoPlayer
+import Levels
 import Control.Monad.State.Lazy
 import qualified Foreign.C.Types
 
@@ -48,7 +49,6 @@ playGame treeNum' srcNum' destNum' gs' = do
 	srcNum <- readIORef srcNum'
 	destNum <- readIORef destNum'
 	gs <- readIORef gs'	
-	--modifyIORef gs' $ playMove (treeNum, srcNum, destNum)
 	if (isValid  [treeNum, srcNum, destNum] (treeList gs) (getPlayerID (turn gs)))
 		then modifyIORef gs' $ playMove (treeNum, srcNum, destNum)
 		else return ()
@@ -85,12 +85,13 @@ display' state' treeNum' srcNum' destNum' gs' points = do
   	--renderPrimitive Points $ mapM_ (\(x, (y, z)) -> vertex $ Vertex2 ((fromIntegral (y-2) :: GLfloat)/3) ((fromIntegral (z-2) :: GLfloat)/3)) points
 	drawAllTrees (treeList gs) points 0
 
-	if (isFinished (treeList gs))
+	if ((isFinished (treeList gs)) || (prediction gs == []))
 		then drawString (-0.99, 0.9) ("Game Over!! " ++ (currentTurn gs) ++ " wins!!")
 		else drawString (-0.99, 0.9) ((currentTurn' gs) ++ "'s turn")
 	--drawTree (tree0) (nodeList tree0) (points !! 0)
 	swapBuffers
 	where
+		prediction gs = computerMove (if (turn gs)==True then 0 else 1) (treeList gs) 
 		displayString state treeNum srcNum destNum = case state of
 			0 -> "Enter Tree Number: "
 			1 -> "Entered Tree Number: " 		++ (show treeNum)
@@ -110,6 +111,11 @@ display' state' treeNum' srcNum' destNum' gs' points = do
 		currentTurn' gs
 			| (turn gs) = "Player 1"
 			| otherwise = "Player 2"
+
+playAIMove gs = GameState{ turn = not (turn gs), treeList = (TreeGameTwoPlayer.modify (treeList gs) move)}
+	where
+		move = computerMove pid (treeList gs)
+		pid = if (turn gs)==True then 0 else 1
 
 display'' gs' points = do
 	gs <- Graphics.UI.GLUT.get gs'
