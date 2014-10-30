@@ -6,7 +6,7 @@ import Graphics.UI.GLUT
 import Data.IORef
 import Data.Char
 import Control.Monad
-import TreeGameTwoPlayer
+import GameUtils
 import Levels
 import Control.Monad.State.Lazy
 import qualified Foreign.C.Types
@@ -112,7 +112,7 @@ display' state' treeNum' srcNum' destNum' gs' points = do
 			| (turn gs) = "Player 1"
 			| otherwise = "Player 2"
 
-playAIMove gs = GameState{ turn = not (turn gs), treeList = (TreeGameTwoPlayer.modify (treeList gs) move)}
+playAIMove gs = GameState{ turn = not (turn gs), treeList = (GameUtils.modify (treeList gs) move)}
 	where
 		move = computerMove pid (treeList gs)
 		pid = if (turn gs)==True then 0 else 1

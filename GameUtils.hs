@@ -1,11 +1,11 @@
-module TreeGameTwoPlayer where
+module GameUtils where
 import Data.Fixed
 import Data.List.Split
 import Control.Monad (forM_, liftM)
-
+import Levels
 player = ["X","Y"]
 colour = ['R','G']
--- SC convert coulour to convert 'r' to 1 .....
+
 -- Player X can remove Red or Blue; Player Y can remove Green or Blue
 -- Levels, Trees, and Nodes are indexed starting from ONE (1)
 
@@ -16,37 +16,34 @@ initgs levelId pId =
 
 
 convertCol :: Char->Int
-convertCol shobhitCol = if shobhitCol == 'R' then 1
-							else if shobhitCol == 'G' then 3
+convertCol charColour = if charColour == 'R' then 1
+							else if charColour == 'G' then 3
 								else 2
 
 formatConversion :: [(Int, Char)]->[(Int, Int)]
-formatConversion adjlist = map (\dest -> ((fst dest), (convertCol (snd dest)))) adjList
+formatConversion adjlist = map (\dest -> ((fst dest), (convertCol (snd dest)) )) adjlist
 
-getDestList :: Tree->[(Int, Int)]
+getDestList :: Tree->Int->[(Int, Int)]
 getDestList [] src = []
-getDestList (node:nodelist) src = if (nodeId node) == src then (formatConversion (adjList node)) else getDestList nodelist src
+getDestList (node:nodelist) src = 
+	if (nodeId node) == src 
+		then (formatConversion (adjList node)) 
+	else getDestList nodelist src
+
+getPlayerID :: Bool->Int
+getPlayerID (turn) = if turn then 0 else 1
+
+--playMove :: (Int,Int,Int) -> IORef GameState -> IORef GameState
+playMove (treeNum, srcNum, destNum) gs = GameState {turn = not (turn gs), treeList = newState}
+	where
+		newState = (modify (treeList gs) [treeNum, srcNum, destNum])
+
+--playAIMove = undefined/
 
 
-data GameState = GameState
-				{
-					turn :: Bool
-					,treeList :: [Tree]
-				}
 
-data Node = Node 
-			{
-				nodeId :: Int
-				,adjList :: [(Int,Char)]
-			}	deriving (Show)
-
-type Move = [Int] -- (tree no., source node id, dest node id). Size must be THREE (3)
-type State = [Tree]
-type Tree = [Node]
-
-
-display :: State -> IO ()
-display state = print state
+--display :: State -> IO ()
+--display state = print state
 
 -- game is finished when each tree has only the root node left, with no edges
 -- so each Tree of State should have EXACTLY one Node
@@ -83,7 +80,7 @@ isValid move state id =
 	if length move /= 3
 		then False
 	else
-		if length edge == 0
+		if ((length edge == 0) || (t==0))
 			then False
 		else
 			(snd (edge !! 0) == (colour !! id)) || (snd (edge !! 0) == 'B')
@@ -93,7 +90,8 @@ isValid move state id =
 		s = move !! 1
 		d = move !! 2
 		tree = (state !! t)
-		srcAdjList = adjList ((filter (\x -> (nodeId x)==s) tree) !! 0)
+		filteredTree = filter (\x -> (nodeId x)==s) tree
+		srcAdjList = if length filteredTree==0 then [] else adjList (filteredTree !! 0)
 		edge = filter (\x -> (fst x)==d) srcAdjList
 
 
@@ -136,17 +134,17 @@ dfs tree move =
 									then [Node {nodeId=s, adjList=newAdjList}] ++ acc
 								else [x]++acc) [] tree
 
-main = do
-	--levels <- loadAllLevels "levels.txt"
-	levelNo <- getLevelNo
-	--let state = levels !! levelNo
-	let state = loadState levelNo
-	gameLoop state 0	-- call gameLoop with initial state and first player
-	return ()
+--main = do
+--	--levels <- loadAllLevels "levels.txt"
+--	levelNo <- getLevelNo
+--	--let state = levels !! levelNo
+--	let state = loadState levelNo
+--	gameLoop state 0	-- call gameLoop with initial state and first player
+--	return ()
 
 gameLoop:: State->Int->IO ()
 gameLoop state id = do
-	display state
+	--display state
 	if ((isFinished state) || (prediction == []))
 		then putStrLn ("\n!!!!!!!!!!!!!!!!!!!!!!!!Player "++(player !! id)++" lost!!!!!!!!!!!!!!!!!!!!!!!!\n")
 	else do
@@ -161,15 +159,15 @@ gameLoop state id = do
 				gameLoop state id 	--if invalid move, then gameLoop with same state and same player
 
 	where 
-		prediction = computerMove state id
+		prediction = computerMove id state
 
 --------------------------------------------------------------
 
 -- functions for the AI part used here just to predict if game ended or not
 -- FOR UNDERSTANDIG THIS, ITS BETTER TO READ THE computer VERSION OF THE GAME in treeGame_computer.hs
 
-computerMove :: State->Int->Move
-computerMove state id =
+computerMove :: Int->State->Move
+computerMove id state =
 	if fst'(move) == False then
 		if null randomEdge
 			then []
@@ -250,86 +248,6 @@ looseOnAll allEdges (e:edges) pId =
 			foldl (\acc x ->if fst'(x)==fst'(e) && snd'(x)==snd'(e) && thrd'(x)==thrd'(e) && frth'(x)==frth'(e)
 								then acc
 							else [x]++acc) [] allEdges
-
--------------------------------------------------------
-
-loadState :: Int->State
-loadState levelNo = levels !! levelNo
-	where levels =	[
-						[ 
-							[
-								Node {nodeId = 1, adjList = []}
-							]
-						],
-
-						--1
-						[
-							[
-								Node {nodeId = 1, adjList = []}
-							] , 
-							
-							[
-								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
-								Node {nodeId=2, adjList=[(5,'B')]},
-								Node {nodeId=3, adjList=[]},
-								Node {nodeId=4, adjList=[(6,'G')]},
-								Node {nodeId=5, adjList=[]},
-								Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
-								Node {nodeId=7, adjList=[]},
-								Node {nodeId=8, adjList=[]}
-							] 
-						],
-
-						--2
-						[
-							[
-								Node {nodeId = 1, adjList = []}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R'),(3,'G'),(4,'B')]},
-								Node {nodeId=2, adjList=[(5,'B')]},
-								Node {nodeId=3, adjList=[]},
-								Node {nodeId=4, adjList=[(6,'G')]},
-								Node {nodeId=5, adjList=[]},
-								Node {nodeId=6, adjList=[(7,'G'),(8,'R')]},
-								Node {nodeId=7, adjList=[]},
-								Node {nodeId=8, adjList=[]}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R')]},
-								Node {nodeId=2, adjList=[(3,'G')]},
-								Node {nodeId=3, adjList=[]}
-							]
-
-						],
-
-						--3
-						[
-							[
-								Node {nodeId = 1, adjList = []}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R')]},
-								Node {nodeId=2, adjList=[(3,'G')]},
-								Node {nodeId=3, adjList=[(4,'R')]},
-								Node {nodeId=4, adjList=[]}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'R')]},
-								Node {nodeId=2, adjList=[]}
-							],
-
-							[
-								Node {nodeId=1, adjList=[(2,'G')]},
-								Node {nodeId=2, adjList=[]}
-							]
-
-						]
-					]
 
 -----------------------------------------------
 {- Basic Code Flow
