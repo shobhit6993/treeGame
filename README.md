@@ -15,6 +15,21 @@ Example command to play 1 player version (User vs Computer) for level=5
 ----
 ### Game Play
 
+* If you are playing the 1 player version, user will be Player#1 and computer will be Player#2.
+* Trees will be displayed along with their treeNo.
+* Each edge will have two nodes - sourceNode (lower one) and destinationNode (upper one)
+* For a move, you need to first enter the treeNo, then sourceNode no., and then destination node no.
+* For example, if you want to remove edge between node 4 and 5 of tree 2,
+	1. Enter Tree number and then press **Right Arrow Key**
+	2. Enter souce node no. and then press **Right Arrow Key**
+	3. Enter destination node no. and then press **Right Arrow Key**
+	4. Press **Right Arrow Key** to confirm move
+	5. Now player 2's turn
+	6. If you enter an invalid move, then the game asks you to enter the move again, till you give a valid move
+
+---
+### Game Rules
+
 * This came is a variant of the [Hackenbush](http://en.wikipedia.org/wiki/Hackenbush) game.
 * 2 players alternate turns.
 * Player 1 can remove either one `Red` edge or one `Blue` edge
