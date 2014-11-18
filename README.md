@@ -30,7 +30,7 @@ Example command to play 1 player version (User vs Computer) for level=5
 ---
 ### Game Rules
 
-* This came is a variant of the [Hackenbush](http://en.wikipedia.org/wiki/Hackenbush) game.
+* This game is a variant of the [Hackenbush](http://en.wikipedia.org/wiki/Hackenbush) game.
 * 2 players alternate turns.
 * Player 1 can remove either one `Red` edge or one `Blue` edge
 * Player 2 can remove either one `Green` edge or one `Blue` edge
