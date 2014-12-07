@@ -2,7 +2,7 @@ treeGame
 ========
 ----
 ### Running Instructions (for Linux)
-    ghci --make game.hs
+    ghc --make game.hs
     ./game <playMode> [levelNo]
 
 * playMode can be `1` (single-player version) or `2` (2-player version)
@@ -10,7 +10,7 @@ treeGame
 
 Example command to play 1 player version (User vs Computer) for level=5
 
-    ghci --make game.hs
+    ghc --make game.hs
     ./game 1 5
 ----
 ### Game Play
